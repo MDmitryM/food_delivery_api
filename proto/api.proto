@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package api;
-option go_package = "github.com/MDmitryM/food_delivery_api/proto";
+option go_package = "proto.api";
 
 service GatewayService{
     rpc CreateOrder (CreateOrderRequest) returns (CreateOrderResponse);
