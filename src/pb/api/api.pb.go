@@ -4,7 +4,7 @@
 // 	protoc        v6.31.1
 // source: api.proto
 
-package proto_api
+package api
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -183,7 +183,7 @@ const file_api_proto_rawDesc = "" +
 	"\aorderID\x18\x01 \x01(\tR\aorderID\x12\x16\n" +
 	"\x06status\x18\x02 \x01(\tR\x06status2R\n" +
 	"\x0eGatewayService\x12@\n" +
-	"\vCreateOrder\x12\x17.api.CreateOrderRequest\x1a\x18.api.CreateOrderResponseB\vZ\tproto.apib\x06proto3"
+	"\vCreateOrder\x12\x17.api.CreateOrderRequest\x1a\x18.api.CreateOrderResponseB\bZ\x06pb/apib\x06proto3"
 
 var (
 	file_api_proto_rawDescOnce sync.Once

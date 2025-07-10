@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package api;
-option go_package = "proto.api";
+option go_package = "pb/api";
 
 service GatewayService{
     rpc CreateOrder (CreateOrderRequest) returns (CreateOrderResponse);
