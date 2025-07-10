@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package api;
+option go_package = "github.com/MDmitryM/food_delivery_api/proto";
+
+service GatewayService{
+    rpc CreateOrder (CreateOrderRequest) returns (CreateOrderResponse);
+}
+
+message Item {
+    string itemID = 1;
+}
+
+message CreateOrderRequest {
+    string userID = 1;
+    repeated Item items = 2;
+}
+
+message CreateOrderResponse {
+    string orderID = 1;
+    string status = 2;
+}
