@@ -1,4 +1,4 @@
-.PHONY: proto img img_push
+.PHONY: proto img img_push img_rm
 
 IMAGE_NAME = mdmitrym/food_delivery_api
 TAG ?= latest
@@ -12,3 +12,6 @@ img:
 
 img_push:
 	docker push ${IMAGE_NAME}:${TAG}
+
+img_rm:
+	docker image rm ${IMAGE_NAME}:${TAG}
