@@ -8,7 +8,6 @@ import (
 
 	server "github.com/MDmitryM/food_delivery_api/src/pb"
 	"github.com/MDmitryM/food_delivery_api/src/pb/api"
-	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 )
@@ -18,8 +17,6 @@ func main() {
 	if err != nil {
 		logrus.Fatalf("listening error %v", err)
 	}
-
-	_ = godotenv.Load() //убрать в продакшене
 
 	authServiceURL := os.Getenv("AUTH_SERVICE_URL")
 	if authServiceURL == "" {
