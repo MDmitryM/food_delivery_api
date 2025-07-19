@@ -13,15 +13,12 @@ import (
 )
 
 func main() {
-	lis, err := net.Listen("tcp", ":8080")
+	lis, err := net.Listen("tcp", ":"+os.Getenv("API_PORT"))
 	if err != nil {
 		logrus.Fatalf("listening error %v", err)
 	}
 
-	authServiceURL := os.Getenv("AUTH_SERVICE_URL")
-	if authServiceURL == "" {
-		logrus.Fatal("AUTH_SERVICE_URL environment variable is required")
-	}
+	authServiceURL := "http://" + os.Getenv("AUTH_HOST") + ":" + os.Getenv("AUTH_PORT")
 
 	s := grpc.NewServer(
 		grpc.UnaryInterceptor(server.AuthInterceptor(authServiceURL)),
