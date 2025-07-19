@@ -8,6 +8,7 @@ import (
 
 	server "github.com/MDmitryM/food_delivery_api/src/pb"
 	"github.com/MDmitryM/food_delivery_api/src/pb/api"
+	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 )
@@ -18,7 +19,16 @@ func main() {
 		logrus.Fatalf("listening error %v", err)
 	}
 
-	s := grpc.NewServer()
+	_ = godotenv.Load() //убрать в продакшене
+
+	authServiceURL := os.Getenv("AUTH_SERVICE_URL")
+	if authServiceURL == "" {
+		logrus.Fatal("AUTH_SERVICE_URL environment variable is required")
+	}
+
+	s := grpc.NewServer(
+		grpc.UnaryInterceptor(server.AuthInterceptor(authServiceURL)),
+	)
 	api.RegisterGatewayServiceServer(s, &server.Server{})
 
 	go func() {
