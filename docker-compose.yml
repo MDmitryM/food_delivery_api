@@ -1,0 +1,25 @@
+services:
+  web:
+    image: mdmitrym/food_delivery_api:latest
+    environment:
+      - RABBITMQ_URI=amqp://user:password@rabbitmq:5672/
+      - API_PORT=8080
+    ports:
+      - 8080:8080
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+  
+  rabbitmq:
+    image: rabbitmq:latest
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    environment:
+        - RABBITMQ_DEFAULT_USER=user
+        - RABBITMQ_DEFAULT_PASS=password
+    ports:
+      - 5672:5672

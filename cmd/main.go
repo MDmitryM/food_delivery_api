@@ -8,11 +8,23 @@ import (
 
 	server "github.com/MDmitryM/food_delivery_api/src/pb"
 	"github.com/MDmitryM/food_delivery_api/src/pb/api"
+	"github.com/MDmitryM/food_delivery_api/src/rabbitmq"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 )
 
 func main() {
+	rabbitUri := os.Getenv("RABBITMQ_URI")
+
+	rabbitHandler, err := rabbitmq.NewRabbitHandler(rabbitUri)
+	if err != nil {
+		logrus.Fatalf("Failed to create rabbit handler uri: '%s', error: '%s'", rabbitUri, err.Error())
+	}
+	logrus.Info("Successfully connected to RabbitMQ")
+
+	defer rabbitHandler.RabbitConnection.Close()
+	defer rabbitHandler.RabbitChannel.Close()
+
 	lis, err := net.Listen("tcp", ":"+os.Getenv("API_PORT"))
 	if err != nil {
 		logrus.Fatalf("listening error %v", err)
@@ -23,7 +35,7 @@ func main() {
 	s := grpc.NewServer(
 		grpc.UnaryInterceptor(server.AuthInterceptor(authServiceURL)),
 	)
-	api.RegisterGatewayServiceServer(s, &server.Server{})
+	api.RegisterGatewayServiceServer(s, server.NewServer(rabbitHandler))
 
 	go func() {
 		if err := s.Serve(lis); err != nil {
