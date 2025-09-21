@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"net"
 	"os"
 	"os/signal"
@@ -9,7 +10,9 @@ import (
 	server "github.com/MDmitryM/food_delivery_api/src/pb"
 	"github.com/MDmitryM/food_delivery_api/src/pb/api"
 	"github.com/MDmitryM/food_delivery_api/src/rabbitmq"
+	"github.com/MDmitryM/food_delivery_api/telemetry"
 	"github.com/sirupsen/logrus"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 )
 
@@ -25,6 +28,25 @@ func main() {
 	defer rabbitHandler.RabbitConnection.Close()
 	defer rabbitHandler.RabbitChannel.Close()
 
+	tracerCfg := telemetry.TracerCfg{
+		ServiceName: "food_delivery_api",
+		JaegerUrl:   os.Getenv("JAEGER_URL"),
+		JaegerPort:  os.Getenv("JAEGER_PORT"),
+	}
+
+	tracer, err := telemetry.InitTelemetry(tracerCfg)
+	if err != nil {
+		logrus.Errorf("Failed to create OTLP tracer, %v", err)
+	} else {
+		logrus.Info("OTLP tracer created successfully")
+
+		defer func() {
+			if err := tracer.Shutdown(context.Background()); err != nil {
+				logrus.Errorf("Tracer shutdown down error, %v", err)
+			}
+		}()
+	}
+
 	lis, err := net.Listen("tcp", ":"+os.Getenv("API_PORT"))
 	if err != nil {
 		logrus.Fatalf("listening error %v", err)
@@ -33,7 +55,11 @@ func main() {
 	authServiceURL := "http://" + os.Getenv("AUTH_HOST") + ":" + os.Getenv("AUTH_PORT")
 
 	s := grpc.NewServer(
-		grpc.UnaryInterceptor(server.AuthInterceptor(authServiceURL)),
+		grpc.StatsHandler(otelgrpc.NewServerHandler()),
+
+		grpc.ChainUnaryInterceptor(
+			server.AuthInterceptor(authServiceURL),
+		),
 	)
 	api.RegisterGatewayServiceServer(s, server.NewServer(rabbitHandler))
 
